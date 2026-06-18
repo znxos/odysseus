@@ -8,6 +8,8 @@ services:
       - /dev/dri:/dev/dri
     ipc: host
     shm_size: '8gb'
+    cap_add:
+      - IPC_LOCK
     volumes:
       - /mnt/d/odysseus_data/data:/app/data:z
       - /mnt/d/odysseus_data/logs:/app/logs:z
@@ -76,6 +78,32 @@ services:
         condition: service_healthy
       chromadb:
         condition: service_started
+    restart: unless-stopped
+
+  llama-backend:
+    image: ghcr.io/ggerganov/llama.cpp:server-vulkan
+    ports:
+      - "8012:8012"
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    ipc: host
+    shm_size: '8gb'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - /mnt/d/odysseus_data/huggingface:/root/.cache/huggingface:ro
+    environment:
+      - GGML_VK_VISIBLE_DEVICES=0
+    command: >
+      --host 0.0.0.0
+      --port 8012
+      --n-gpu-layers 16
+      --no-mmap
+      --mlock
+      --cache-type-k q4_0
+      --cache-type-v q4_0
+      --ctx-size 32768
     restart: unless-stopped
 
   chromadb:
