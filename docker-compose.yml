@@ -83,7 +83,7 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM ghcr.io/ggerganov/llama.cpp:server-vulkan
+        FROM ghcr.io/ggml-org/llama.cpp:server-vulkan
         USER root
         RUN apt-get update && apt-get install -y --no-install-recommends \
             mesa-vulkan-drivers \
