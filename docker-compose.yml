@@ -4,9 +4,7 @@ services:
     ports:
       - "${APP_BIND:-127.0.0.1}:${APP_PORT:-7000}:7000"
     devices:
-      - /dev/kfd:/dev/kfd
-      - /dev/dri/card0:/dev/dri/card0
-      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dxg:/dev/dxg
     ipc: host
     shm_size: '8gb'
     volumes:
