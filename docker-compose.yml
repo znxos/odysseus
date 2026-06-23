@@ -2,7 +2,7 @@ services:
   odysseus:
     build: .
     ports:
-      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-7000}:7000"
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-7000}:7000"
     devices:
       - /dev/dxg:/dev/dxg
     ipc: host
@@ -30,8 +30,8 @@ services:
       - OLLAMA_BACKEND=vulkan
       - GGML_VK_VISIBLE_DEVICES=0
       - CUDA_VISIBLE_DEVICES=""
-      - LLM_HOST=${LLM_HOST:-localhost}
-      - LLM_HOSTS=${LLM_HOSTS:-}
+      - LLM_HOST=${LLM_HOST:-host.docker.internal:8012}
+      - LLM_HOSTS=${LLM_HOSTS:-host.docker.internal:8012}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-}
       - RESEARCH_LLM_ENDPOINT=${RESEARCH_LLM_ENDPOINT:-}
@@ -77,43 +77,6 @@ services:
         condition: service_healthy
       chromadb:
         condition: service_started
-    restart: unless-stopped
-
-  llama-backend:
-    build:
-      context: .
-      dockerfile_inline: |
-        FROM ghcr.io/ggml-org/llama.cpp:server-vulkan
-        USER root
-        RUN apt-get update && apt-get install -y --no-install-recommends \
-            libvulkan1 \
-            libvulkan-dev \
-            vulkan-tools \
-            mesa-vulkan-drivers \
-            && apt-get clean && rm -rf /var/lib/apt/lists/*
-    user: "0:0"
-    ports:
-      - "8012:8012"
-    devices:
-      - /dev/dxg:/dev/dxg
-    ipc: host
-    shm_size: '8gb'
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - /mnt/d/odysseus_data/huggingface:/root/.cache/huggingface:ro
-      - /usr/lib/wsl:/usr/lib/wsl:ro
-    environment:
-      - GGML_VK_VISIBLE_DEVICES=0
-      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
-      - VK_DRIVER_FILES=/usr/share/vulkan/icd.d/amd_icd64.json
-    command: >
-      --host 0.0.0.0
-      --port 8012
-      --n-gpu-layers 30
-      --cache-type-k q4_0
-      --cache-type-v q4_0
-      --ctx-size 32768
     restart: unless-stopped
 
   chromadb:
