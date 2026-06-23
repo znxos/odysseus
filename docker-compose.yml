@@ -78,7 +78,8 @@ services:
       chromadb:
         condition: service_started
     restart: unless-stopped
-    llama-backend:
+
+  llama-backend:
     build:
       context: .
       dockerfile_inline: |
@@ -109,6 +110,7 @@ services:
       --cache-type-v q4_0
       --ctx-size 32768
     restart: unless-stopped
+
   chromadb:
     image: docker.io/chromadb/chroma:latest
     ports:
